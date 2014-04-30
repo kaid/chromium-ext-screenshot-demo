@@ -4,7 +4,7 @@ function Capture() {
     this.$overlay = jQuery("<div id=\"4ye-screenshot-overlay\"></div>");
     this.$selection = jQuery("<div id=\"4ye-screenshot-selection\"></div>").appendTo(this.$overlay);
     this.$overlay.attr("style", "height:100%;width:100%;position:absolute;top:0;left:0;display:none;z-index:999999999;").css(this.bg);
-    this.$selection.hide().attr("style", "position:absolute;");
+    this.$selection.hide().attr("style", "position:absolute;min-width:16px;min-height:16px;");
     this.$tl = jQuery("<div></div>").attr("style", "position:absolute;top:0;left:0;").appendTo(this.$overlay).css(this.bg);
     this.$tr = jQuery("<div></div>").attr("style", "position:absolute;top:0;right:0;").appendTo(this.$overlay).css(this.bg);
     this.$br = jQuery("<div></div>").attr("style", "position:absolute;bottom:0;right:0;").appendTo(this.$overlay).css(this.bg);
@@ -17,8 +17,8 @@ function Capture() {
 
 Capture.prototype.reset_selection = function() {
     this.start = {x: 0, y: 0};
-    this.selected = {height: 0, width: 0, left: 0, top: 0};
-    this.$selection.css(this.selected);
+    this.selected = {height: 16, width: 16, left: 0, top: 0};
+    this.$selection.css(this.selected).hide();
 }
 
 Capture.prototype.set_callback = function(callback) {
@@ -31,7 +31,7 @@ Capture.prototype.bind = function() {
     var self = this;
 
     this.$overlay.on("mousedown", function(event) {
-        self.$selection.fadeOut(function() {
+        self.$selection.hide(function() {
             self.reset_selection();
             self.capturing     = true;
             self.selected.top  = self.start.y = event.pageY;
@@ -53,6 +53,7 @@ Capture.prototype.bind = function() {
             self.selected.height = Math.abs(height);
             self.selected.width  = Math.abs(width);
             
+            self.$overlay.animate(self.nobg);
             self.resize_overlay();
             self.$selection.css(self.selected);
         }
@@ -62,6 +63,7 @@ Capture.prototype.bind = function() {
         self.capturing = false;
         self.selected.left = event.clientX - self.selected.width;
         self.selected.top  = event.clientY - self.selected.height;
+        self.$overlay.css(self.nobg)
         self.$selection.trigger("save");  
     });
     
@@ -75,7 +77,6 @@ Capture.prototype.bind = function() {
 }
 
 Capture.prototype.resize_overlay = function() {
-    this.$overlay.css(this.nobg);
     this.$tl.css({width: this.selected.left + this.selected.width, height: this.selected.top})
     this.$tr.css({width: this.$overlay.width() - (this.selected.left + this.selected.width), height: this.selected.top + this.selected.height})
     this.$tr.css({width: this.$overlay.width() - (this.selected.left + this.selected.width), height: this.selected.top + this.selected.height})
@@ -85,11 +86,11 @@ Capture.prototype.resize_overlay = function() {
 
 Capture.prototype.inject = function() {
     this.$overlay.css({"height": jQuery(document).height(), "width": jQuery(document).width()});
-    this.$overlay.appendTo(jQuery("body")).fadeIn();
+    this.$overlay.appendTo(jQuery("body")).show();
 }
 
 Capture.prototype.detach = function() {
-    this.$overlay.fadeOut().remove();
+    this.$overlay.hide().remove();
 }
 
 Capture.prototype.crop = function(data) {
@@ -104,7 +105,6 @@ Capture.prototype.crop = function(data) {
         canvas.width  = self.selected.width;
         canvas.height = self.selected.height;
         
-        console.log(self.selected);
         ctx.drawImage(self.img,
                       self.selected.left,
                       self.selected.top,
@@ -142,7 +142,7 @@ chrome.runtime.onMessage.addListener(function(message) {
             Capture.inject(function(src) {
                 var $img = jQuery("<img src=\"javascript:void(0);\" id=\"4ye-image-view\">");
                 $img = jQuery("#4ye-image-view").length > 0 ? jQuery("#4ye-image-view") : $img.appendTo(jQuery("body"));
-                $img.attr("style", "background-color:white;box-shadow:0 0 8px #444;position:fixed;top:0;left:0;bottom:0;right:0;margin:auto;").hide();
+                $img.attr("style", "background-color:white;box-shadow:0 0 8px #444;position:fixed;top:0;left:0;bottom:0;right:0;margin:auto;z-index:99999999").hide();
                 $img.slideDown(function() {
                     Capture.detach();
                 });
@@ -150,4 +150,10 @@ chrome.runtime.onMessage.addListener(function(message) {
             });
             break;
     }
+});
+
+jQuery(document).on("click", "#4ye-image-view", function() {
+    jQuery(this).fadeOut(function() {
+        jQuery(this).remove();
+    })
 });
