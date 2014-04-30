@@ -34,8 +34,8 @@ Capture.prototype.bind = function() {
         self.$selection.fadeOut(function() {
             self.reset_selection();
             self.capturing     = true;
-            self.selected.top  = self.start.y = event.clientY;
-            self.selected.left = self.start.x = event.clientX;
+            self.selected.top  = self.start.y = event.pageY;
+            self.selected.left = self.start.x = event.pageX;
 
             if (0 === event.button) {
                 self.$selection.css(self.selected).show();
@@ -45,21 +45,23 @@ Capture.prototype.bind = function() {
     
     this.$overlay.on("mousemove", function(event) {
         if (self.capturing) {
-            var height = event.clientY - self.start.y
-              , width  = event.clientX - self.start.x;
+            var height = event.pageY - self.start.y
+              , width  = event.pageX - self.start.x;
             
-            self.selected.top    = height > 0 ? self.start.y : event.clientY;
-            self.selected.left   = width  > 0 ? self.start.x : event.clientX;
+            self.selected.top    = height > 0 ? self.start.y : event.pageY;
+            self.selected.left   = width  > 0 ? self.start.x : event.pageX;
             self.selected.height = Math.abs(height);
             self.selected.width  = Math.abs(width);
             
-            self.$selection.css(self.selected);
             self.resize_overlay();
+            self.$selection.css(self.selected);
         }
     });
     
     this.$overlay.on("mouseup", function(event) {
         self.capturing = false;
+        self.selected.left = event.clientX - self.selected.width;
+        self.selected.top  = event.clientY - self.selected.height;
         self.$selection.trigger("save");  
     });
     
@@ -82,6 +84,7 @@ Capture.prototype.resize_overlay = function() {
 }
 
 Capture.prototype.inject = function() {
+    this.$overlay.css({"height": jQuery(document).height(), "width": jQuery(document).width()});
     this.$overlay.appendTo(jQuery("body")).fadeIn();
 }
 
@@ -101,6 +104,7 @@ Capture.prototype.crop = function(data) {
         canvas.width  = self.selected.width;
         canvas.height = self.selected.height;
         
+        console.log(self.selected);
         ctx.drawImage(self.img,
                       self.selected.left,
                       self.selected.top,
