@@ -1,0 +1,13 @@
+*~
+\#*
+.\#*
+*.swp
+.DS_*
+.bundle
+goals/*.xml
+.sass-cache/
+public/js/*
+public/css/*
+config/mongoid.yml
+config/env.yml
+config/output_settings.yml
