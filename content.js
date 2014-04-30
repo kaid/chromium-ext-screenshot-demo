@@ -53,7 +53,7 @@ Capture.prototype.bind = function() {
             self.selected.height = Math.abs(height);
             self.selected.width  = Math.abs(width);
             
-            self.$overlay.animate(self.nobg);
+            self.$overlay.css(self.nobg);
             self.resize_overlay();
             self.$selection.css(self.selected);
         }
@@ -61,8 +61,8 @@ Capture.prototype.bind = function() {
     
     this.$overlay.on("mouseup", function(event) {
         self.capturing = false;
-        self.selected.left = event.clientX - self.selected.width;
-        self.selected.top  = event.clientY - self.selected.height;
+        self.selected.left = self.selected.left - jQuery(document).scrollLeft();
+        self.selected.top  = self.selected.top  - jQuery(document).scrollTop();
         self.$overlay.css(self.nobg)
         self.$selection.trigger("save");  
     });
