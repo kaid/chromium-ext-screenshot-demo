@@ -10,7 +10,6 @@
     "content_scripts": [
         {
             "matches": ["http://*/*", "https://*/*", "file:///*"],
-            "css": ["content.css"],
             "js": ["jquery.min.js", "content.js"]
         }
     ],
