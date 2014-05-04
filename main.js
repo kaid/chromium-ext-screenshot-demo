@@ -3,7 +3,7 @@ chrome.browserAction.onClicked.addListener(function(tab) {
 });
 
 chrome.runtime.onMessage.addListener(function(message, sender, respond) {
-    chrome.tabs.captureVisibleTab(null, null, function(data_url) {
+    chrome.tabs.captureVisibleTab(null, {format: "png"}, function(data_url) {
         respond(data_url);
     });
     
