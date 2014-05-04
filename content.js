@@ -136,24 +136,91 @@ Capture.detach = function() {
     this.current = null;
 }
 
+function data_url_to_blob(data_url) {
+    var BASE64_MARKER = ';base64,';
+    if (data_url.indexOf(BASE64_MARKER) == -1) {
+        var parts = data_url.split(',');
+        var contentType = parts[0].split(':')[1];
+        var raw = parts[1];
+
+        return new Blob([raw], {type: contentType});
+    }
+
+    var parts = data_url.split(BASE64_MARKER);
+    var contentType = parts[0].split(':')[1];
+    var raw = window.atob(parts[1]);
+    var rawLength = raw.length;
+
+    var uInt8Array = new Uint8Array(rawLength);
+
+    for (var i = 0; i < rawLength; ++i) {
+        uInt8Array[i] = raw.charCodeAt(i);
+    }
+
+    return new Blob([uInt8Array], {type: contentType});
+}
+
+function upload(file, fn) {
+    file.name = "image" + (new Date).valueOf() + ".png";
+
+    var data = new FormData;
+    data.append("file", file, file.name);
+
+    deferred = jQuery.ajax({
+        type        : "POST",
+        contentType : false,
+        processData : false,
+        url         : "http://img.4ye.me/images",
+        data        : data
+    });
+
+    deferred.done(fn);
+}
+
 chrome.runtime.onMessage.addListener(function(message) {
     switch(message.task) {
         case "capture":
             Capture.inject(function(src) {
-                var $img = jQuery("<img src=\"javascript:void(0);\" id=\"4ye-image-view\">");
-                $img = jQuery("#4ye-image-view").length > 0 ? jQuery("#4ye-image-view") : $img.appendTo(jQuery("body"));
-                $img.attr("style", "background-color:white;box-shadow:0 0 8px #444;position:fixed;top:0;left:0;bottom:0;right:0;margin:auto;z-index:99999999").hide();
-                $img.slideDown(function() {
+                var $container = jQuery("<div id=\"4ye-image-view\"></div")
+                , $img = jQuery("<img src=\"javascript:void(0);\">").appendTo($container)
+                , $button = jQuery("<div></div>").attr("style", "box-shadow:0 0 8px #444;background-color:#000;display:inline-block;margin-top:12px;color:#fff;padding:4px;")
+                , $submit = $button.clone().text("提交").appendTo($container).css("float", "left")
+                , $cancel = $button.clone().text("取消").appendTo($container).css("float", "right");
+
+                $container = jQuery("#4ye-image-view").length > 0 ? jQuery("#4ye-image-view") : $container.appendTo(jQuery("body"));
+                $container.attr("style", "position:fixed;top:0;left:0;bottom:0;right:0;margin:auto;z-index:99999999;").hide();
+                $img.attr("style", "background-color:white;box-shadow:0 0 8px #444;");
+                
+                $img.on("load", function() {
+                    $container.css({"height": $img[0].height + 64, "width": $img[0].width});
                     Capture.detach();
+                    $container.slideDown();
                 });
+
                 $img.attr("src", src);
+                
+                $img.on("upload", function() {
+                    $submit.text("正在上传....");
+
+                    upload(data_url_to_blob(src), function(res) {
+                        $submit.text("上传完毕!").css("background-color", "green");
+
+                        $container.fadeOut(function() {
+                            $container.remove();
+                        });
+                    });
+                });
+                
+                $submit.on("click", function() {
+                    $img.trigger("upload");
+                });
+
+                $cancel.on("click", function() {
+                    $container.fadeOut(function() {
+                        $container.remove();
+                    });
+                });
             });
             break;
     }
-});
-
-jQuery(document).on("click", "#4ye-image-view", function() {
-    jQuery(this).fadeOut(function() {
-        jQuery(this).remove();
-    })
 });
