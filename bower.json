@@ -1,0 +1,24 @@
+{
+  "name": "4ye-image-collector",
+  "version": "0.0.1",
+  "authors": [
+    "Kaid <kaid@kaid.me>"
+  ],
+  "description": "Extension for img.4ye.me.",
+  "main": "index.js",
+  "keywords": [
+    "exound"
+  ],
+  "license": "MIT",
+  "homepage": "img.4ye.me",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.1",
+    "lodash": "~2.4.1"
+  }
+}
