@@ -22,6 +22,10 @@
       "js": [
         "dist/jquery.js",
         "dist/content.js"
+      ],
+      
+      "css": [
+        "dist/main.css"
       ]
     }
   ],

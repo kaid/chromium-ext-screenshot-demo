@@ -1,64 +1,65 @@
-class jQueryProxy
-  @jproxy = (el_name, methods)->
+class TemplateLoader
+  (name)~>
+    @url = chrome.extension.getURL("dist/#name.html")
+
+  bind: (view)->
+    jQuery.ajax do
+      async: false
+      type: "GET"
+      url: @url
+      success: (html)~>
+        view.$el = jQuery(html)
+
+
+class View
+  @delegate_to = (methods)->
     method <~ methods.forEach
     @::[method] = (...args)->
-      @[el_name][method](...args)
-      @
+      value = @$el[method](...args)
+      if value.constructor == jQuery && value.selector == @selector then @ else value
 
-class Overlay extends jQueryProxy
-  @jproxy "$el", <[on show hide css appendTo remove trigger]>
+  @delegate_to <[on trigger show hide addClass appendTo remove css find]>
+
+  load_template: (template)->
+    TemplateLoader(template).bind(@)
+
+
+class Overlay extends View
+  @delegate_to <[width height]>
 
   ->
-    @bg   = {"background-color": "rgba(0,0,0,0.5)"}
-    @nobg = {"background-color": "rgba(0,0,0,0)"}
-    @$el  = jQuery("<div id=\"4ye-screenshot-overlay\"></div>")
+    @nobg = "background-color": "rgba(0,0,0,0)"
 
-    @$el
-      .attr("style", "height:100%;width:100%;position:absolute;top:0;left:0;display:none;z-index:999999999;")
-      .css(@bg)
+    @load_template("overlay")
 
-    @$tl = jQuery("<div></div>")
-      .attr("style", "position:absolute;top:0;left:0;")
-      .appendTo(@$el)
-      .css(@bg)
+    @$tl = @$el.find(".tl")
+    @$tr = @$el.find(".tr")
+    @$br = @$el.find(".br")
+    @$bl = @$el.find(".bl")
 
-    @$tr = jQuery("<div></div>")
-      .attr("style", "position:absolute;top:0;right:0;")
-      .appendTo(@$el)
-      .css(@bg)
-
-    @$br = jQuery("<div></div>")
-      .attr("style", "position:absolute;bottom:0;right:0;")
-      .appendTo(@$el)
-      .css(@bg)
-
-    @$bl = jQuery("<div></div>")
-      .attr("style", "position:absolute;bottom:0;left:0;")
-      .appendTo(@$el)
-      .css(@bg)
+  inject: ->
+    @css(height: jQuery(document).height(), width: jQuery(document).width())
+      .appendTo(document.body)
+      .show!
 
   select: (selected)->
-    @$el.css @nobg
+    @css(@nobg)
 
     @$tl.css do
       width:  selected.left + selected.width
       height: selected.top
 
     @$tr.css do
-      width:  @$el.width() - (selected.left + selected.width)
-      height: selected.top + selected.height
-
-    @$tr.css do
-      width:  @$el.width() - (selected.left + selected.width)
+      width:  @width() - (selected.left + selected.width)
       height: selected.top + selected.height
 
     @$br.css do
-      width:  @$el.width() - selected.left
-      height: @$el.height() - (selected.top + selected.height)
+      width:  @width() - selected.left
+      height: @height() - (selected.top + selected.height)
 
     @$bl.css do
       width:  selected.left
-      height: @$el.height() - selected.top
+      height: @height() - selected.top
 
 
 class Capture
@@ -111,13 +112,10 @@ class Capture
     ImageCropper(data, @selected, @callback).exec()
 
   detach: ->
-    @overlay.hide().remove()
+    @overlay.hide!.remove!
 
   inject: -> 
-    @overlay
-      .css({"height": jQuery(document).height(), "width": jQuery(document).width()})
-      .appendTo(jQuery("body"))
-      .show()
+    @overlay.inject!
 
   @inject = (callback)->
     return if @current
@@ -158,35 +156,15 @@ class ImageCropper
       @callback(@canvas.toDataURL()) if @callback
 
 
-class Popup extends jQueryProxy
-  @jproxy "$el", <[show hide remove slideDown css appendTo attr fadeOut]>
+class Popup extends View
+  @delegate_to <[slideDown attr fadeOut]>
 
   (@src)->
-    @$el = jQuery("<div id=\"4ye-image-view\"></div>")
+    @load_template("uploader")
 
-    @$img = jQuery("<img>")
-      .appendTo(@$el)
-
-    $button = jQuery("<div></div>")
-      .attr("style", "box-shadow:0 0 8px #444;background-color:#000;display:inline-block;margin-top:12px;color:white;padding:4px;")
-
-    @$submit = $button
-      .clone()
-      .text("提交")
-      .appendTo(@$el)
-      .css("float", "left")
-
-    @$cancel = $button
-      .clone()
-      .text("取消")
-      .appendTo(@$el)
-      .css("float", "right")
-
-    @attr("style", "position:fixed;top:0;left:0;bottom:0;right:0;margin:auto;z-index:99999999;")
-      .hide()
-
-    @$img
-      .attr("style", "background-color:white;box-shadow:0 0 8px #444;")
+    @$img = @find("img")
+    @$submit = @find(".submit")
+    @$cancel = @find(".cancel")
 
     @appendTo(document.body)
     @bind()

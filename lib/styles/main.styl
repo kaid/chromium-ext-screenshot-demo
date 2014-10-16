@@ -1,0 +1,79 @@
+.bg {
+    background-color: rgba(0,0,0,0.5);
+}
+
+.nobg {
+    background-color: rgba(0,0,0,0);
+}
+
+.overlay-4ye {
+    @extend .bg;
+
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: none;
+    z-index: 999999999;
+
+    .part {
+        @extend .bg;
+        position: absolute;
+    }
+
+    .tl {
+        top: 0;
+        left: 0;
+    }
+
+    .tr {
+        top: 0;
+        right: 0;
+    }
+
+    .bl {
+        bottom: 0;
+        left: 0;
+    }
+
+    .br {
+        bottom: 0;
+        right: 0;
+    }
+}
+
+.uploader-4ye {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    bottom: 0px;
+    right: 0px;
+    margin: auto;
+    z-index: 99999999;
+    height: 431px;
+    width: 552px;
+    display: none;
+    
+    img {
+        background-color: white;
+        box-shadow: 0 0 8px #444;
+    }
+    
+    .button {
+        box-shadow: rgb(68, 68, 68) 0px 0px 8px;
+        display: inline-block;
+        margin-top: 12px;
+        color: white;
+        padding: 4px 12px;
+        background-color: rgb(0, 0, 0);
+    }
+    
+    .submit {
+        float: left;
+    }
+
+    .cancel {
+        float: right;
+    }
+}
