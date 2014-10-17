@@ -16,6 +16,7 @@
     left: 0;
     display: none;
     z-index: 999999999;
+    overflow: hidden;
 
     .part {
         @extend .bg;
@@ -43,7 +44,7 @@
     }
 }
 
-.uploader-4ye {
+.popup-4ye {
     position: fixed;
     top: 0px;
     left: 0px;
@@ -51,16 +52,12 @@
     right: 0px;
     margin: auto;
     z-index: 99999999;
-    height: 431px;
-    width: 552px;
+    width: 552px !important;
+    max-height: 431px !important;
     display: none;
     
-    img {
-        background-color: white;
-        box-shadow: 0 0 8px #444;
-    }
-    
-    .button {
+    .button-4ye {
+        border-radius: 2px;
         box-shadow: rgb(68, 68, 68) 0px 0px 8px;
         display: inline-block;
         margin-top: 12px;
@@ -68,12 +65,24 @@
         padding: 4px 12px;
         background-color: rgb(0, 0, 0);
     }
+
+    .info {
+        border-radius: 2px;
+        background-color: white;
+        box-shadow: 0 0 8px #444;
+        max-width: 552px;
+        overflow: scroll;
+    }
     
-    .submit {
+    .text {
+        padding: 16px 0px;
+    }
+    
+    .left {
         float: left;
     }
 
-    .cancel {
+    .right {
         float: right;
     }
 }

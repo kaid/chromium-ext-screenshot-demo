@@ -21,6 +21,7 @@
 
       "js": [
         "dist/jquery.js",
+        "dist/lodash.compat.js",
         "dist/content.js"
       ],
       

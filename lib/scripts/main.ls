@@ -1,9 +1,9 @@
 chrome.browserAction.onClicked.addListener (tab)->
   chrome.tabs.sendMessage(tab.id, task: "capture")
 
-chrome.runtime.onMessage.addListener (message, sender, respond)->
-  console.log(message: message)
-  chrome.tabs.captureVisibleTab null, format: "png", (data_url)->
-    respond(data_url)
-  
-  return true
+(request, sender, respond) <- chrome.runtime.onMessage.addListener
+switch request.task
+| "capture"  => chrome.tabs.captureVisibleTab null, format: "png", respond
+| otherwise  => console.log("unhandled request: ", request)
+
+return true
